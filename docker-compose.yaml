@@ -1,0 +1,16 @@
+services:
+  reverse-proxy:
+    image: traefik:v3.2
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.http.routers.api.rule=Host(`hendryw.com`)" 
+      - "traefik.http.routers.api.rule=Host(`api.docker.localhost`)"
