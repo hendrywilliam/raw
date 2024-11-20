@@ -1,4 +1,13 @@
 services:
+  watchtower:
+    image: containrrr/watchtower
+    command:
+      - "--label-enable"
+      - "--interval"
+      - "30"
+      - "--rolling-restart"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
   reverse-proxy:
     image: traefik:v3.2
     command: 
@@ -8,8 +17,6 @@ services:
       - "--entryPoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email=goofysleepykoala@gmail.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      # redirect 80 (http) -> 443 (https)
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
@@ -19,14 +26,14 @@ services:
     volumes:
       - letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: registry.digitalocean.com/sleepykoala/raw:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`hendryw.com`)"
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.tls.certresolver=myresolver"
+      - "com.centurylinklabs.watchtower.enable=true"
 volumes:
   letsencrypt:
