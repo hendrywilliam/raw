@@ -8,6 +8,7 @@ services:
       - "--rolling-restart"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock 
+      - /root/.docker/config.json:/config.json
   reverse-proxy:
     image: traefik:v3.2
     command: 
